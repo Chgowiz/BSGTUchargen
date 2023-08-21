@@ -1,3 +1,21 @@
+# Chgowiz's Battlestar Galactica/Traveller Character Generator #
+
+This fork does the following:
+
+* Switch all basic chargen rules to Classic Traveller 1977, including skills. (I kept the scouts get 2 skills/term houserule)
+* Implement the specific chargen houserules for my Battlestar Galactica universe
+
+Those houserules include:
+
+* No noble titles, Social Standing in BSGTU is more influencer/celebrity/VIP status
+* Different gun skills are available in different services
+* ATV is now ground vehicles (either civilian or military)
+* Air/Raft is now aircraft (either civilian or military)
+* NCO and Flight NCO (for those with flight-type skills) if never commissioned
+* Officer ranks per BSG lore (from both original and reimagined series)
+* Characters may still be in service when the Colonies are destroyed!
+* Mustering out benefits updated to BSGTU - no free ships or passages, but lore-compatible substitutes
+
 # Classic Traveller Character Generator #
 
 This JavaScript character generator for the classic Traveller sci-fi roleplaying game follows the character creation rules in The Traveller Book ([available in PDF](https://www.rpgnow.com/product/80192/CTTTBThe-Traveller-Book)).
