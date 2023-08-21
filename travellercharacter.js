@@ -6,6 +6,9 @@
 // Additional Contributors
 // Frank Filz
 //
+// MES/Chgowiz - 8/19/23 -- Modifications made to reflect chargen within my Battlestar Galactica universe
+// Current chargen houserules are here: https://docs.google.com/document/d/1ReC9pij1dvn3qMgjf3y_zJF93FE8cKp6Rm9dO1d4IWE/edit?usp=sharing
+//
 // URL Parameters ?param=value&param=value
 //
 // history=
@@ -50,6 +53,8 @@
 // vehicles=
 //     dole out vehicle skills as one of 1977, 1981, TTB, or ST
 //     default is as TTB
+//
+
 function travellerCharacter(output) {
 // output is 'text', 'html', or 'JSON'.
 
@@ -128,7 +133,8 @@ function generateGender() {
 //------------------------ Cascade Skills ------------------------//
 function cascadeBlade() {
     // Call like cascadeBlade.call(t)
-    var blades = ['Dagger', 'Foil', 'Sword', 'Cutlass', 'Broadsword', 'Bayonet', 'Spear', 'Halberd', 'Pike', 'Cudgel'];
+    // MES 8/19/23 - BSGTU change - limit to blades in campaign
+    var blades = ['Dagger', 'Bayonet', 'Blade', 'Sword'];
     var knownBlades = [];
     if (this.urlParam('cascade') == 'skip') {
         return 'Blade';
@@ -138,7 +144,8 @@ function cascadeBlade() {
             knownBlades.push(this.skills[i][0]);
         }
     }
-    if (knownBlades.length > 0) {
+    // MS 82023 - 80/20: will pick already known blade, will pick new blade
+    if (knownBlades.length > 0 && (rndInt(1,10) < 9)) {
         return arnd(knownBlades);
     } else {
         return arnd(blades);
@@ -146,7 +153,9 @@ function cascadeBlade() {
 }
 function cascadeGun() {
     // Call like cascadeGun.call(t)
-    var guns = ['Body Pistol', 'Auto Pistol', 'Revolver', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG', 'Laser Carbine', 'Laser Rifle'];
+    // MS 82023 Each service has their preference or options for weapons most likely used. 
+    // var guns = ['Body Pistol', 'Auto Pistol', 'Revolver', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG', 'Laser Rifle'];
+    var guns = s[this.service].guns;
     var knownGuns = [];
     if (this.urlParam('cascade') == 'skip') {
         return 'Gun';
@@ -156,7 +165,8 @@ function cascadeGun() {
             knownGuns.push(this.skills[i][0]);
         }
     }
-    if (knownGuns.length > 0) {
+    // MS 82023 - 80/20: will pick already known wpn, will pick new wpn
+    if ((knownGuns.length > 0) && (rndInt(1,10) < 9)) {
         return arnd(knownGuns);
     } else {
         return arnd(guns);
@@ -164,7 +174,7 @@ function cascadeGun() {
 }
 function cascadeVehicle() {
     // Call like cascadeVehicle.call(t)
-    var vehicles = ['Prop-Driven Aircraft', 'Jet-Driven Aircraft', 'Helicopter', 'Grav Vehicle', 'Tracked Vehicle', 'Wheeled Vehicle', 'Large Watercraft', 'Small Watercraft', 'Hovercraft', 'Submersible'];
+    var vehicles = ['Aircraft (civilian)', 'Aircraft (military)', 'Ground Vehicle (civilian)', 'Vehicle (military)'];
     var knownVehicles = [];
     if (this.urlParam('cascade') == 'skip') {
         return 'Vehicle';
@@ -189,9 +199,9 @@ s.draft = function () {
 };
 //---------------- Define "Navy" service ----------------//
 s.navy = {
-    serviceName: 'Navy', // like "in the Navy"
-    memberName: 'Navy', // like "Navy Admiral Nelson"
-    adjName: "Naval", // like "the Naval service"
+    serviceName: 'Colonial Navy', // like "in the Colonial Navy"
+    memberName: 'Colonial Navy', // like "Navy Admiral Nelson"
+    adjName: "Colonial Naval", // like "the Naval service"
     enlistmentThrow: 8,
     enlistmentDM: function (attributes) {
         var dm = 0;
@@ -230,15 +240,6 @@ s.navy = {
         }
     },
     reenlistThrow: 6,
-    ranks: {
-        0: 'Starman',
-        1: 'Ensign',
-        2: 'Lieutenant',
-        3: 'Lt Cmdr',
-        4: 'Commander',
-        5: 'Captain',
-        6: 'Admiral'
-    },
     checkPromotion: function () {
         var dm = 0;
         var sv = roll(2);
@@ -262,10 +263,44 @@ s.navy = {
         }
     },
     doPromotion: function() {
-        if (this.rank == 5 || 6) {
-            this.improveAttribute('social', 1);
-        }
+        // MS 81923 - BSGTU, CT77, higher ranks don't automatically get bumped in Soc.
+        // if (this.rank > 4) {
+        //     this.improveAttribute('social', 1);
+        // }
     },
+    // ***** BSGTU CHANGES *****
+    // MES 8/19/23 - BSGTU updated ranks
+    ranks: {
+        0: 'Crewman Apprentice',
+        1: 'Ensign',
+        2: 'Lieutenant',
+        3: 'Captain',
+        4: 'Major',
+        5: 'Colonel',
+        6: 'Commander',
+        7: 'Admiral'
+    },
+    // MES 81923 - Enlisted ranks
+    ncoranks: {
+        0: 'Crewman Apprentice',
+        1: 'Crewman',
+        2: 'Specialist',
+        3: 'Petty Officer, 2nd',
+        4: 'Petty Officer, 1st',
+        5: 'Chief Petty Officer',
+        6: 'Master Chief Petty Officer'
+    },
+    // MES 81923 - Enlisted Flight ranks
+    flightncoranks: {
+        0: 'Flight Apprentice',
+        1: 'Flight Crewman',
+        2: 'Flight Specialist',
+        3: 'Flight Petty Officer',
+        4: 'Senior Flight Petty Officer',
+        5: 'Chief Petty Officer',
+        6: 'Master Chief Petty Officer'
+    },
+    guns: ['Auto Pistol', 'Carbine', 'Auto Rifle', 'Shotgun', 'SMG'],
     musterCash: {
         1: 1000,
         2: 5000,
@@ -278,33 +313,31 @@ s.navy = {
     musterBenefits: function (dm) {
         switch(roll(1) + dm) {
             case 1:
-                this.addBenefit.call(t, 'Low Passage');
+                // MES 8/19/23 - BSGTU 
+                this.addBenefit.call(t, 'Tools');
                 break;
             case 2:
                 this.improveAttribute('intelligence', 1);
                 break;
             case 3:
-                this.improveAttribute('education', 1);
+                this.improveAttribute('education', 2);
                 break;
             case 4:
             	this.doBladeBenefit.call(t);
                 break;
             case 5:
-                if (this.benefits.indexOf("Travellers' Aide Society") > -1) {
-                    break;
-                }
-                this.addBenefit.call(t, "Travellers' Aid Society");
-                this.TAS = true;
+                // MES 8/19/23 - BSGTU 
+                this.addBenefit.call(t, "Favor - Ship");
                 break;
             case 6:
-                this.addBenefit.call(t, 'High Passage');
+                this.addBenefit.call(t, 'Patron');
                 break;
             default:
                 this.improveAttribute('social', 2);
         }
     },
     canMuster: function (strategy) {
-        return strategy == 'TAS' || strategy == 'special';
+        return false;
     },
     acquireSkill: function () {
         // Skills acquired during a term of service.
@@ -331,7 +364,8 @@ s.navy = {
                 break;
             case 3:
                 switch(roll(1)) {
-                    case 1: this.addSkill('Vacc Suit'); break;
+                    // MES 81923 - BSGTU - from Vacc Suit to Ship's Boat, since all PCs have .5 in Vacc Suit.
+                    case 1: this.addSkill("Ship's Boat"); break;
                     case 2: this.addSkill('Mechanical'); break;
                     case 3: this.addSkill('Electronics'); break;
                     case 4: this.addSkill('Engineering'); break;
@@ -354,9 +388,9 @@ s.navy = {
 };
 //---------------- Define "Marines" service ----------------//
 s.marines = {
-    serviceName: 'Marines', // like "in the Navy"
-    memberName: 'Marine', // like "Navy Admiral Nelson"
-    adjName: 'Marines', // like "the Naval service"
+    serviceName: 'Colonial Marines', // like "in the Navy"
+    memberName: 'Colonial Marine', // like "Navy Admiral Nelson"
+    adjName: 'Colonial Marines', // like "the Naval service"
     enlistmentThrow: 9,
     enlistmentDM: function (attributes) {
         var dm = 0;
@@ -382,7 +416,6 @@ s.marines = {
         if (attributes.social >= 8) { dm += 1; }
         return dm;
     },
-    getServiceSkills: function () { return ['Cutlass']; },
     checkSurvival: function () {
         var dm = 0;
         var sv = roll(2);
@@ -395,15 +428,6 @@ s.marines = {
         }
     },
     reenlistThrow: 6,
-    ranks: {
-        0: '',
-        1: 'Lieutenant',
-        2: 'Captain',
-        3: 'Force Comdr',
-        4: 'Lt Colonel',
-        5: 'Colonel',
-        6: 'Brigadier'
-    },
     checkPromotion: function () {
         var dm = 0;
         var sv = roll(2);
@@ -426,11 +450,45 @@ s.marines = {
             return false;
         }
     },
+    // ***** BSGTU CHANGES *****
+    getServiceSkills: function () { return ['Blade']; },
+    // MES 8/19/23 - BSGTU updated ranks
     doPromotion: function() {
         if (this.rank == 1) {
-            this.addSkill('Revolver');
+            this.addSkill('Auto Pistol');
         }
     },
+    ranks: {
+        0: 'Private',
+        1: 'Lieutenant, 2nd',
+        2: 'Lieutenant, 1st',
+        3: 'Captain',
+        4: 'Major',
+        5: 'Lt. Colonel',
+        6: 'Colonel',
+        7: 'Brigadier'
+    },
+    // MES 81923 - Enlisted ranks
+    ncoranks: {
+        0: 'Private',
+        1: 'Private, 1st',
+        2: 'Corporal',
+        3: 'Crew Sergeant',
+        4: 'Sergeant, 1st',
+        5: 'Gunnery Sergeant',
+        6: 'Sergeant Major'
+    },
+    // MES 81923 - Enlisted Flight ranks
+    flightncoranks: {
+        0: 'Private',
+        1: 'Flight Private, 1st',
+        2: 'Flight Corporal',
+        3: 'Flight Sergeant',
+        4: 'Senior Flight Sergeant',
+        5: 'Gunnery Sergeant',
+        6: 'Sergeant Major'
+    },
+    guns: ['Auto Pistol', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG', 'Laser Rifle'],
     musterCash: {
         1: 2000,
         2: 5000,
@@ -443,10 +501,10 @@ s.marines = {
     musterBenefits: function (dm) {
         switch(roll(1) + dm) {
             case 1:
-                this.addBenefit.call(t, 'Low Passage');
+                this.addBenefit.call(t, 'Tools');
                 break;
             case 2:
-                this.improveAttribute('intelligence', 1);
+                this.improveAttribute('intelligence', 2);
                 break;
             case 3:
                 this.improveAttribute('education', 1);
@@ -455,21 +513,17 @@ s.marines = {
             	this.doBladeBenefit.call(t);
                 break;
             case 5:
-                if (this.benefits.indexOf("Travellers' Aide Society") > -1) {
-                    break;
-                }
-                this.addBenefit.call(t, "Travellers' Aid Society");
-                this.TAS = true;
+            	this.doGunBenefit.call(t);
                 break;
             case 6:
-                this.addBenefit.call(t, 'High Passage');
+                this.addBenefit.call(t, 'Patron');
                 break;
             default:
                 this.improveAttribute('social', 2);
         }
     },
     canMuster: function (strategy) {
-        return strategy == 'TAS' || strategy == 'special';
+        return false;
     },
     acquireSkill: function () {
         switch(this.whichSkillTable.call(this)) {
@@ -480,17 +534,12 @@ s.marines = {
                     case 3: this.improveAttribute('endurance', 1); break;
                     case 4: this.addSkill('Gambling'); break;
                     case 5: this.addSkill('Brawling'); break;
-                    default: this.addSkill(cascadeBlade.call(this));
+                    default: this.improveAttribute('education', 1); break;
                 }
                 break;
             case 2:
                 switch(roll(1)) {
-                    case 1: if (this.vehicles != '1981') {
-                            this.addSkill('ATV');
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
+                    case 1: this.addSkill('Ground vehicles (military)'); break;
                     case 2: this.addSkill('Vacc Suit'); break;
                     case 3: this.addSkill(cascadeBlade.call(this)); break;
                     case 4: this.addSkill(cascadeGun.call(this)); break;
@@ -500,12 +549,7 @@ s.marines = {
                 break;
             case 3:
                 switch(roll(1)) {
-                    case 1: if (this.vehicles == '1977') {
-                            this.addSkill('ATV');
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
+                    case 1: this.addSkill('Ground Vehicles (military)'); break;
                     case 2: this.addSkill('Mechanical'); break;
                     case 3: this.addSkill('Electronics'); break;
                     case 4: this.addSkill('Tactics'); break;
@@ -528,9 +572,9 @@ s.marines = {
 };
 //---------------- Define "Army" service ----------------//
 s.army = {
-    serviceName: 'Army', // like "in the Navy"
-    memberName: 'Army', // like "Navy Admiral Nelson"
-    adjName: 'Army', // like "the Naval service"
+    serviceName: 'Colonial Army', // like "in the Navy"
+    memberName: 'Colonial Army', // like "Navy Admiral Nelson"
+    adjName: 'Colonial Army', // like "the Naval service"
     enlistmentThrow: 5,
     enlistmentDM: function (attributes) {
         var dm = 0;
@@ -556,7 +600,6 @@ s.army = {
         if (attributes.education >= 7) { dm += 1; }
         return dm;
     },
-    getServiceSkills: function () { return ['Rifle']; },
     checkSurvival: function () {
         var dm = 0;
         var sv = roll(2);
@@ -569,15 +612,6 @@ s.army = {
         }
     },
     reenlistThrow: 7,
-    ranks: {
-        0: 'Trooper',
-        1: 'Lieutenant',
-        2: 'Captain',
-        3: 'Major',
-        4: 'Lt Colonel',
-        5: 'Colonel',
-        6: 'General'
-    },
     checkPromotion: function () {
         var dm = 0;
         var sv = roll(2);
@@ -600,11 +634,45 @@ s.army = {
             return false;
         }
     },
+    // ***** BSGTU CHANGES *****
+    getServiceSkills: function () { return ['Auto Rifle']; },
+    // MES 8/19/23 - BSGTU updated ranks
     doPromotion: function() {
         if (this.rank == 1) {
             this.addSkill('SMG');
         }
     },
+    ranks: {
+        0: 'Private',
+        1: 'Lieutenant, 2nd',
+        2: 'Lieutenant, 1st',
+        3: 'Captain',
+        4: 'Major',
+        5: 'Lt. Colonel',
+        6: 'Colonel',
+        7: 'General'
+    },
+    // MES 81923 - Enlisted ranks
+    ncoranks: {
+        0: 'Private',
+        1: 'Private, 1st',
+        2: 'Corporal',
+        3: 'Sergeant',
+        4: 'Master Sergeant',
+        5: 'Sergeant, 1st',
+        6: 'Sergeant Major'
+    },
+    // MES 81923 - Enlisted Flight ranks
+    flightncoranks: {
+        0: 'Private',
+        1: 'Flight Private, 1st',
+        2: 'Flight Corporal',
+        3: 'Flight Sergeant',
+        4: 'Senior Flight Sergeant',
+        5: 'Sergeant, 1st',
+        6: 'Sergeant Major'
+    },
+    guns: ['Auto Pistol', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG', 'Laser Rifle'],
     musterCash: {
         1: 2000,
         2: 5000,
@@ -617,22 +685,22 @@ s.army = {
     musterBenefits: function (dm) {
         switch(roll(1) + dm) {
             case 1:
-                this.addBenefit.call(t, 'Low Passage');
+                this.addBenefit.call(t, 'Tools');
                 break;
             case 2:
                 this.improveAttribute('intelligence', 1);
                 break;
             case 3:
-                this.improveAttribute('education', 1);
+                this.improveAttribute('education', 2);
                 break;
             case 4:
             	this.doGunBenefit.call(t);
                 break;
             case 5:
-                this.addBenefit.call(t, 'High Passage');
+                this.addBenefit.call(t, 'Favor - Vehicle');
                 break;
             case 6:
-                this.addBenefit.call(t, 'Middle Passage');
+                this.addBenefit.call(t, 'Patron');
                 break;
             default:
                 this.improveAttribute('social', 1);
@@ -654,14 +722,9 @@ s.army = {
                 }
                 break;
             case 2:
-                switch(roll(1)) {
-                    case 1: if (this.vehicles != '1981') {
-                            this.addSkill('ATV');
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
-                    case 2: this.addSkill('Air/Raft'); break;
+                switch(roll(1)){
+                    case 1: this.addSkill('Ground Vehicles (military)'); break;
+                    case 2: this.addSkill('Aircraft (military)'); break;
                     case 3: this.addSkill(cascadeGun.call(this)); break;
                     case 4: this.addSkill('Fwd Obsvr'); break;
                     case 5: this.addSkill(cascadeBlade.call(this)); break;
@@ -670,12 +733,7 @@ s.army = {
                 break;
             case 3:
                 switch(roll(1)) {
-                    case 1: if (this.vehicles == '1977') {
-                            this.addSkill('ATV');
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
+                    case 1: this.addSkill('Ground Vehicles (military)'); break;
                     case 2: this.addSkill('Mechanical'); break;
                     case 3: this.addSkill('Electronics'); break;
                     case 4: this.addSkill('Tactics'); break;
@@ -698,9 +756,9 @@ s.army = {
 };
 //---------------- Define "Scouts" service ----------------//
 s.scouts = {
-    serviceName: 'Scouts', // like "in the Navy"
-    memberName: 'Scout', // like "Navy Admiral Nelson"
-    adjName: 'Scout', // like "the Naval service"
+    serviceName: 'Colonial Scouts', // like "in the Navy"
+    memberName: 'Colonial Scout', // like "Navy Admiral Nelson"
+    adjName: 'Colonial Scout', // like "the Naval service"
     enlistmentThrow: 7,
     enlistmentDM: function (attributes) {
         var dm = 0;
@@ -714,7 +772,6 @@ s.scouts = {
         if (attributes.endurance >= 9) { dm += 2; }
         return dm;
     },
-    getServiceSkills: function () { return ['Pilot']; },
     checkSurvival: function () {
         var dm = 0;
         var sv = roll(2);
@@ -735,6 +792,13 @@ s.scouts = {
         return false;
     },
     doPromotion: function() { return; },
+    // ***** BSGTU CHANGES *****
+    getServiceSkills: function () { return ['Pilot', "Ship's Boat"]; },
+    // MES 81923 - Enlisted ranks
+    ncoranks: { 0: '', 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' },
+    // MES 81923 - Enlisted Flight ranks
+    flightncoranks: { 0: '', 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' },
+    guns: ['Body Pistol', 'Revolver', 'Auto Pistol', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG'],
     musterCash: {
         1: 20000,
         2: 20000,
@@ -745,9 +809,10 @@ s.scouts = {
         7: 50000
     },
     musterBenefits: function (dm) {
-        switch(roll(1) + dm) {
+        //switch(roll(1) + dm) {
+        switch(6) {
             case 1:
-                this.addBenefit.call(t, 'Low Passage');
+                this.addBenefit.call(t, 'Tools');
                 break;
             case 2:
                 this.improveAttribute('intelligence', 2);
@@ -756,25 +821,20 @@ s.scouts = {
                 this.improveAttribute('education', 2);
                 break;
             case 4:
-            	this.doBladeBenefit.call(t);
-                break;
-            case 5:
             	this.doGunBenefit.call(t);
                 break;
-            case 6:
-                if (this.benefits.indexOf('Scout Ship') > -1) {
-                    this.debugHistory('No benefit');
-                    break;
-                }
-                this.addBenefit.call(t, 'Scout Ship');
-                this.ship = true;
+            case 5:
+                this.addBenefit.call(t, 'Favor-Vehicle');
                 break;
-            default:
-                this.improveAttribute('social', 1);
-        }
+            default: 
+                var cash = s['scouts'].musterCash[roll(1)]
+                t.cubits += cash;
+                //t.verboseHistory(numCommaSep(cash) + ' cubits from Job+Cash');
+                this.addBenefit.call(t, 'Job + Bonus (' + numCommaSep(cash) + ' cubits)');
+        }   
     },
     canMuster: function (strategy) {
-        return strategy == 'ship' || strategy == 'special';
+        return false;
     },
     acquireSkill: function () {
         switch(this.whichSkillTable.call(this)) {
@@ -790,7 +850,12 @@ s.scouts = {
                 break;
             case 2:
                 switch(roll(1)) {
-                    case 1: this.addSkill('Air/Raft'); break;
+                    case 1: 
+                        if (roll(1) < 4)
+                            this.addSkill('Aircraft (military)'); 
+                        else
+                            this.addSkill('Aircraft (civilian)');
+                        break;
                     case 2: this.addSkill('Vacc Suit'); break;
                     case 3: this.addSkill('Mechanical'); break;
                     case 4: this.addSkill('Navigation'); break;
@@ -800,12 +865,7 @@ s.scouts = {
                 break;
             case 3:
                 switch(roll(1)) {
-                    case 1: if (this.vehicles == '1977') {
-                            this.addSkill('Air/Raft');
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
+                    case 1: this.addSkill("Ship's Boat"); break;
                     case 2: this.addSkill('Mechanical'); break;
                     case 3: this.addSkill('Electronics'); break;
                     case 4: this.addSkill('Jack-o-T'); break;
@@ -870,13 +930,32 @@ s.merchants = {
     },
     reenlistThrow: 4,
     ranks: {
-        0: '',
+        0: 'Crewmember',
         1: '4th Officer',
         2: '3rd Officer',
         3: '2nd Officer',
         4: '1st Officer',
         5: 'Captain',
         6: 'Senior Captain'
+    },
+    //MS 82023 BSGTU Noncommissioned ranks
+    ncoranks: {
+        0: 'Crewmember',
+        1: 'Crewmember',
+        2: 'Crewmember',
+        3: 'Crewmember',
+        4: 'Senior Crewmember',
+        5: 'Senior Crewmember',
+        6: 'Senior Crewmember'
+    },
+    flightncoranks: { 
+        0: 'Crewmember',
+        1: 'Crewmember',
+        2: 'Crewmember',
+        3: 'Crewmember',
+        4: 'Senior Crewmember',
+        5: 'Senior Crewmember',
+        6: 'Senior Crewmember'
     },
     checkPromotion: function() {
         var dm = 0;
@@ -905,6 +984,8 @@ s.merchants = {
             this.addSkill('Pilot');
         }
     },
+    // MS 82023 BSGTU 
+    guns: ['Body Pistol', 'Revolver', 'Auto Pistol', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG'],
     musterCash: {
         1: 1000,
         2: 5000,
@@ -917,7 +998,7 @@ s.merchants = {
     musterBenefits: function (dm) {
         switch(roll(1) + dm) {
             case 1:
-                this.addBenefit.call(t, 'Low Passage');
+                this.addBenefit.call(t, 'Tools');
                 break;
             case 2:
                 this.improveAttribute('intelligence', 1);
@@ -932,7 +1013,7 @@ s.merchants = {
             	this.doBladeBenefit.call(t);
                 break;
             case 6:
-                this.addBenefit.call(t, 'Low Passage');
+                this.addBenefit.call(t, 'Patron');
                 break;
             default:
                 if (this.benefits.indexOf('Free Trader') > -1) {
@@ -950,7 +1031,7 @@ s.merchants = {
         }
     },
     canMuster: function (strategy) {
-        return strategy == 'ship' || strategy == 'special';
+        return false;
     },
     acquireSkill: function () {
         switch(this.whichSkillTable.call(this)) {
@@ -966,12 +1047,7 @@ s.merchants = {
                 break;
             case 2:
                 switch(roll(1)) {
-                    case 1: if (this.vehicles == '1977') {
-                            this.improveAttribute('strength', 1);
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
+                    case 1: this.improveAttribute('strength', 1); break;
                     case 2: this.addSkill('Vacc Suit'); break;
                     case 3: this.addSkill('Jack-o-T'); break;
                     case 4: this.addSkill('Steward'); break;
@@ -985,7 +1061,7 @@ s.merchants = {
                     case 2: this.addSkill('Mechanical'); break;
                     case 3: this.addSkill('Electronics'); break;
                     case 4: this.addSkill('Navigation'); break;
-                    case 5: this.addSkill('Gunnery'); break;
+                    case 5: this.addSkill("Ship's Boat"); break;    // MS 82023 BSGT - civilian ships don't usually have weapons mounted
                     default: this.addSkill('Medical');
                 }
                 break;
@@ -1004,9 +1080,9 @@ s.merchants = {
 };
 //---------------- Define "Other" service ----------------//
 s.other = {
-    serviceName: 'other service', // like "in the Navy"
+    serviceName: 'Other Service', // like "in the Navy"
     memberName: '', // like "Navy Admiral Nelson"
-    adjName: 'other', // like "the Naval service"
+    adjName: 'Other', // like "the Naval service"
     enlistmentThrow: 3,
     enlistmentDM: function (attributes) {
         var dm = 0;
@@ -1032,6 +1108,11 @@ s.other = {
     },
     reenlistThrow: 5,
     ranks: { 0: '', 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' },
+    // MES 81923 - Enlisted ranks
+    ncoranks: { 0: '', 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' },
+    // MES 81923 - Enlisted Flight ranks
+    flightncoranks: { 0: '', 1: '', 2: '', 3: '', 4: '', 5: '', 6: '' },
+    guns: ['Body Pistol', 'Revolver', 'Auto Pistol', 'Carbine', 'Rifle', 'Auto Rifle', 'Shotgun', 'SMG'],
     checkPromotion: function () {
         return false;
     },
@@ -1051,7 +1132,7 @@ s.other = {
     musterBenefits: function (dm) {
         switch(roll(1) + dm) {
             case 1:
-                this.addBenefit.call(t, 'Low Passage');
+                this.addBenefit.call(t, 'Tools');
                 break;
             case 2:
                 this.improveAttribute('intelligence', 1);
@@ -1063,10 +1144,10 @@ s.other = {
             	this.doGunBenefit.call(t);
                 break;
             case 5:
-                this.addBenefit.call(t, 'High Passage');
+            	this.doBladeBenefit.call(t);
                 break;
             default:
-                this.debugHistory('No benefit');
+                this.addBenefit.call(t, 'Patron');
                 break;
         }
     },
@@ -1087,12 +1168,7 @@ s.other = {
                 break;
             case 2:
                 switch(roll(1)) {
-                    case 1: if (this.vehicles == '1977') {
-                            this.addSkill('Forgery');
-                        } else {
-                            this.addSkill(cascadeVehicle.call(this));
-                        }
-                        break;
+                    case 1: this.addSkill('Forgery'); break;
                     case 2: this.addSkill('Gambling'); break;
                     case 3: this.addSkill('Brawling'); break;
                     case 4: this.addSkill('Bribery'); break;
@@ -1144,15 +1220,16 @@ t.gender = generateGender();
 t.name = generateName(t.gender);
 t.showHistory = 'simple';
 t.terms = 0;
-t.credits = 0;
+t.cubits = 0;
 t.history = [];
 t.benefits = [];
 t.ship = false;
 t.TAS = false;
+t.flightNCO = false;      // MS 81923 BSGTU - If an enlisted/NCO has learned aircraft/ships boat/pilot, their rank has special names
 t.mortgage = 40;
 t.bladeBenefit = '';
 t.gunBenefit = '';
-t.vehicles = 'TTB';
+t.vehicles = '';        // MS 82023 BSGTU - Vehicle skills are modified directly in each service.
 t.doBladeBenefit = function () {
     if (t.bladeBenefit == '') {
         t.bladeBenefit = cascadeBlade.call(t);
@@ -1340,7 +1417,7 @@ t.determineService = function() {
         }
     }
     // Now we need to make sure we use the correct service DM
-    preferredServiceDM = s[preferredService].enlistmentDM(t.attributes);
+    var preferredServiceDM = s[preferredService].enlistmentDM(t.attributes);
     // Attempt to enlist
     var serviceSkills = [];
     var en = roll(2);
@@ -1394,6 +1471,7 @@ t.doServiceTerm = function () {
     t.verboseHistory('--------------------------------------------');
     t.verboseHistory('Term ' +
         t.terms + ' age ' + t.age);
+    // MES 82023 - BSGTU - I'll allow it. It's a common houserule for CT77.
     if (t.service == 'scouts') {
         t.skillPoints += 2;
     } else if (t.terms == 1) {
@@ -1423,6 +1501,14 @@ t.doServiceTerm = function () {
             s[t.service].doPromotion.call(t);
             t.history.push('Promoted to ' + s[t.service].ranks[t.rank] + '.');
         }
+    } else if (t.commissioned && (t.rank = 6) && (t.attributes.social > 10)) {
+        // MES 81923 - Level 7 rank promotion check, requires Soc B+ and commission check
+        if (s[t.service].checkCommission.call(t)) {
+            t.rank += 1;
+            t.skillPoints += 1;
+            s[t.service].doPromotion.call(t);
+            t.history.push('Promoted to ' + s[t.service].ranks[t.rank] + '.');
+        }
     }
     for (var i = 0, limit = t.skillPoints; i < limit; i++) {
         s[t.service].acquireSkill.call(t);
@@ -1446,7 +1532,12 @@ t.musterOut = function () {
     var cashUsed = 0;
     var looking = false;
     var found = false;
-    t.musterStrategy = t.urlParam('muster');
+    // MS 82023 - BSGTU override - force a split strategy unless param is used
+    if (t.urlParam('muster') !== '')
+        t.musterStrategy = t.urlParam('muster');
+    else
+    t.musterStrategy = 'split';
+
     if (t.urlParam('maxcash') !== '') {
         maxCash = t.urlParam('maxcash');
         if (maxCash > 3) {
@@ -1455,13 +1546,22 @@ t.musterOut = function () {
     }
     t.verboseHistory('--------------------------------------------');
     t.verboseHistory('Mustered Out');
-    if ((t.rank == 1) || (t.rank == 2)) {
-        musterRolls += 1;
-    } else if ((t.rank == 3) || (t.rank == 4)) {
-        musterRolls += 2;
-    } else if (t.rank >= 5) {
-        benefitsDM += 1;
-        musterRolls += 3;
+    // MS 81923 BSGTU - Higher NCOs can get extra mustering out benefits.
+    if (t.commissioned){
+        if ((t.rank == 1) || (t.rank == 2)) {
+            musterRolls += 1;
+        } else if ((t.rank == 3) || (t.rank == 4)) {
+            musterRolls += 2;
+        } else if (t.rank >= 5) {
+            benefitsDM += 1;
+            musterRolls += 3;
+        }   
+    } else {
+        if ((t.rank == 5) || ((t.rank == 4) && t.flightNCO)) {
+            musterRolls += 1;
+        } else if (t.rank == 6){
+            musterRolls += 2;
+        }        
     }
     if (t.checkSkill('Gambling') >= 0) {
         cashDM += 1;
@@ -1474,8 +1574,8 @@ t.musterOut = function () {
         if (cashUsed < maxCash && (!looking || t.found || found ||
             (t.musterStrategy == 'split' && (i % 2) == 1))) {
             var cash = s[t.service].musterCash[roll(1) + cashDM]
-            t.credits += cash;
-            t.verboseHistory(numCommaSep(cash) + ' credits');
+            t.cubits += cash;
+            t.verboseHistory(numCommaSep(cash) + ' cubits');
             cashUsed += 1;
         } else {
             s[t.service].musterBenefits.call(t, benefitsDM);
@@ -1580,18 +1680,37 @@ t.doAging = function () {
        t.ageAttribute('intelligence', 9, -1);
     }
     // Aging crisis?
-    for (var a in t.attributes) {
+    for (a in t.attributes) {
         if (t.attributes[a] < 1) {
             var cr = roll(2);
             t.verboseHistory('Aging crisis due to ' + a +
                              ' dropping below 1 roll ' + cr + ' vs 8');
             if (cr < 8) {
-                t.history.push("Died of illness.");
+                t.history.push("Died of illness/accident/combat.");
                 t.deceased = true;
                 t.activeDuty = false;
             } else {
                 t.attributes[a] = 1;
             }
+        }
+    }
+};
+t.doEnlistedNCOPromotions = function () {
+    t.verboseHistory('--------------------------------------------');
+    t.verboseHistory('Never commissioned - checking for NCO promotions.');
+    for (ncoterm = 1; ncoterm <= t.terms; ncoterm++){
+        // Check for promotion
+        if (s[t.service].checkPromotion.call(t)) {
+            if (t.rank < 6) t.rank += 1;
+            // Those with flight jobs get different names than regular enlisted/NCOs
+            if ((t.checkSkill("Ship's Boat") > -1) || (t.checkSkill("Pilot") > -1) || (t.checkSkill("Aircraft (military)") > -1)){
+                t.history.push('Term ' + ncoterm + ' - enlisted/NCO promotion to ' + s[t.service].flightncoranks[t.rank] + '.');
+                t.flightNCO = true;
+            } else {
+                t.history.push('Term ' + ncoterm + ' - enlisted/NCO promotion to ' + s[t.service].ncoranks[t.rank] + '.');
+            }
+        } else {
+            t.history.push('Term ' + ncoterm + ' - no enlisted/NCO promotion.');
         }
     }
 };
@@ -1663,18 +1782,27 @@ t.toString = function () {
         }).call(this) +
         (function () {
             if (s[this.service].ranks[this.rank] !== '') {
-                return s[this.service].ranks[this.rank] + ' ';
+                // MS81923 - BSGTU - show enlisted rank if never commissioned
+                if (this.commissioned)
+                    return s[this.service].ranks[this.rank] + ' ';
+                else if (this.flightNCO)
+                    return s[this.service].flightncoranks[this.rank] + ' ';
+                else
+                    return s[this.service].ncoranks[this.rank] + ' ';
             } else {
                 return '';
             }
         }).call(this) +
-        (function () {
+        
+/*      // MES 81923 - eliminate Noble titles, this doesn't exist in BSGTU
+         (function () {
             if (this.attributes.social > 10) {
                 return this.getNobleTitle() + ' ';
             } else {
                 return '';
             }
         }).call(this) +
+ */
         this.name +
         '    ' + this.getAttrString() + '    Age ' + this.age + "\n" +
         (function () {
@@ -1686,7 +1814,7 @@ t.toString = function () {
         }).call(this) +
         (function () {
             if (! this.deceased) {
-                return "                        Cr" + numCommaSep(this.credits);
+                return "                        Cu" + numCommaSep(this.cubits);
             } else {
                 return '';
             }
@@ -1731,7 +1859,11 @@ t.toString = function () {
                     }
                 }
                 return benefits;
-            } else { return ''; }
+            } else if (this.activeDuty) {
+                    return "\nStill in service as of the Fall of Cimtar.\n"
+            } else {
+                return ''; 
+            }
         }).call(this) +
         (function () {
             if (this.showHistory == 'none') {
@@ -1757,7 +1889,7 @@ t.reset = function() {
     t.gender = generateGender();
     t.name = generateName(t.gender);
     t.terms = 0;
-    t.credits = 0;
+    t.cubits = 0;
     t.benefits = [];
     t.ship = false;
     t.TAS = false;
@@ -1794,7 +1926,7 @@ if (t.urlParam('maxchars') != '') {
 while (t.activeDuty && (! t.deceased)) {
     t.doServiceTerm();
     t.doAging();
-    if (! t.deceased) {
+    if (!t.deceased) {
         if (t.hunt == 'skill') {
             var level = 1;
             var skill = t.urlParam('skill');
@@ -1814,8 +1946,21 @@ while (t.activeDuty && (! t.deceased)) {
         }
     }
     if (!t.activeDuty && !t.deceased) {
-        t.musterOut();
+        if (!t.commissioned && t.service != "scouts" && t.service != "other" ){
+            // Check for non-comm promotion and set rank accordingly.
+            t.doEnlistedNCOPromotions();
+        }
+        // MS 81923 BSGTU - check to see if still in active duty. 1 on 1d6
+        if (roll(1) == 1){
+            t.verboseHistory("Active duty check - true")
+            t.activeDuty = true;
+            break;
+        } else {
+            t.verboseHistory("Active duty check - false")
+            t.musterOut();
+        }
     }
+
     if (!t.activeDuty) {
         if (t.numresets >= t.maxchars) {
             t.failed = true;
@@ -1829,12 +1974,32 @@ while (t.activeDuty && (! t.deceased)) {
     }
 }
 
+/* t.numberchars = 1;
+if (t.urlParam('charnum') != '') {
+    t.numberchars = t.urlParam('charnum');
+}
+var outputstring = "";
+for (var charsgend = 0; charsgend < t.numberchars; charsgend++) {
+    
+        if (!t.failed) {
+            console.log(t.toString());
+            outputstring += t.toString() + "\n\n";
+            t.reset();
+        } else {
+            console.log(t.toStringFail());
+            return t.toStringFail(); 
+        }     
+    
+}
+return outputstring; */
+
 if (!t.failed) {
     console.log(t.toString());
     return t.toString();
 } else {
     console.log(t.toStringFail());
-    return t.toStringFail();
-}
+    return t.toStringFail(); 
+}     
+
 
 } // End wrapper function travellerCharacterGenerator()
